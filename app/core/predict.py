@@ -1,26 +1,34 @@
-import os
+import string
 
-from config import base_dir
+import autocomplete
 
 
 class Predictor(object):
-    def __init__(self, cat_id, models_dir=os.path.join(base_dir, 'models')):
-        self._cat_id = cat_id
-        self._models_dir = models_dir
+    def __init__(self, model_file):
+        self._model_file = model_file
+        print(self.model_file)
+        autocomplete.models.load_models(load_path=self.model_file)
 
     @property
-    def cat_id(self):
-        return self._cat_id
+    def model_file(self):
+        return self._model_file
 
-    @cat_id.setter
-    def cat_id(self, value):
-        self._cat_id = value
+    @model_file.setter
+    def model_file(self, value):
+        self._model_file = value
 
-    @property
-    def models_dir(self):
-        return self._models_dir
+    def predict(self, word1, word2, n=10):
+        predictions = []
+        if len(word2) is not 0:
+            return autocomplete.predict(first_word=word1, second_word=word2, top_n=n)
 
-    @models_dir.setter
-    def models_dir(self, value):
-        self._models_dir = value
+        for letter in string.ascii_lowercase:
+            for p in autocomplete.predict(first_word=word1, second_word=letter, top_n=n):
+                predictions.append(p)
 
+        predictions = sorted(predictions, key=lambda t: t[1], reverse=True)[:n]
+        return predictions
+
+
+p1 = Predictor("/home/rawand/PycharmProjects/dingocv-api/models/22_information_technology.pkl")
+print(p1.predict("android", "k"))

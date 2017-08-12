@@ -86,7 +86,7 @@ class AutocompleteTrainer(object):
             cat_details = self._get_category_details(cat_id)
             cat_code = cat_details.get('category_code')
             cat_name = cat_details.get('category')
-            fname = '{}_{}.pk'.format(cat_id, cat_code).replace(" ", "").replace("-", "_")
+            fname = '{}_{}.pkl'.format(cat_id, cat_code).replace(" ", "").replace("-", "_")
             dir = os.path.join(base_dir, self.save_dir)
 
             if not os.path.exists(dir):
@@ -147,3 +147,6 @@ class AutocompleteTrainer(object):
         if self.cursor is not None:
             self.cursor.close()
 
+
+ac = AutocompleteTrainer()
+ac.train()
