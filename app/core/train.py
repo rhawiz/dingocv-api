@@ -147,7 +147,3 @@ class AutocompleteTrainer(object):
         if self.cursor is not None:
             self.cursor.close()
 
-            #
-            # ac = AutocompleteTrainer([1, 4])
-            # ac.train()
-            # print(ac.mapping)
