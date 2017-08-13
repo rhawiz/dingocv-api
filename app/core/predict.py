@@ -17,18 +17,22 @@ class Predictor(object):
     def model_file(self, value):
         self._model_file = value
 
-    def predict(self, word1, word2, n=10):
+    def predict(self, word1, word2=None, n=20):
         predictions = []
-        if len(word2) is not 0:
-            return autocomplete.predict(first_word=word1, second_word=word2, top_n=n)
+
+        if word2 is not None and len(word2) is not 0:
+            predictions = [i[0] for i in autocomplete.predict(first_word=word1, second_word=word2, top_n=n)]
+            return  predictions
 
         for letter in string.ascii_lowercase:
             for p in autocomplete.predict(first_word=word1, second_word=letter, top_n=n):
                 predictions.append(p)
 
-        predictions = sorted(predictions, key=lambda t: t[1], reverse=True)[:n]
+        predictions = list(set(predictions))
+
+        predictions = [i[0] for i in sorted(predictions, key=lambda t: t[1], reverse=True)[:n]]
         return predictions
 
 
-p1 = Predictor("/home/rawand/PycharmProjects/dingocv-api/models/22_information_technology.pkl")
-print(p1.predict("android", "k"))
+p1 = Predictor("/home/rawand/PycharmProjects/dingocv-api/models/0_all.pkl")
+print(p1.predict("Developed"))

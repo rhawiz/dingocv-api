@@ -1,5 +1,4 @@
 import logging
-import autocomplete as ac
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 

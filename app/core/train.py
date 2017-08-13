@@ -3,7 +3,7 @@ import re
 
 from config import base_dir, logger
 
-SELECT_CAT_PHRASE_QUERY = """
+SELECT_PHRASE_QUERY = """
 SELECT phrases.id,
        phrases.phrase,
        phrases.total_exp_months,
@@ -17,8 +17,9 @@ SELECT phrases.id,
        LEFT JOIN
        categories ON category_id = categories.id
 
-WHERE category_id = {cat_id}
 """
+
+SELECT_PHRASE_CATEGORY_FILTER = """WHERE category_id = {cat_id}"""
 
 SELECT_ALL_CATEGORIES_QUERY = """SELECT id, category, category_code, description from categories"""
 SELECT_CATEGORY_QUERY = """SELECT id, category, category_code, description from categories WHERE id={cat_id}"""
@@ -41,6 +42,8 @@ class AutocompleteTrainer(object):
             categories = self._get_categories()
         self._categories = categories
         self._mapping = {}
+        print(sqlite_path)
+        print(save_dir)
 
     @property
     def categories(self):
@@ -82,8 +85,18 @@ class AutocompleteTrainer(object):
     def train(self):
 
         for cat_id in self.categories:
-            query = SELECT_CAT_PHRASE_QUERY.format(cat_id=cat_id)
+
+            query = SELECT_PHRASE_QUERY
+
+            if cat_id is not 0:
+                filter_part = SELECT_PHRASE_CATEGORY_FILTER.format(cat_id=cat_id)
+                query += filter_part
             cat_details = self._get_category_details(cat_id)
+
+            if cat_details is None:
+                logger.error('No category id {}'.format(cat_id))
+                continue
+
             cat_code = cat_details.get('category_code')
             cat_name = cat_details.get('category')
             fname = '{}_{}.pkl'.format(cat_id, cat_code).replace(" ", "").replace("-", "_")
@@ -103,11 +116,19 @@ class AutocompleteTrainer(object):
         return self._mapping
 
     def _get_category_details(self, cat_id):
-        id, category, category_code, description = self.cursor.execute(
-            SELECT_CATEGORY_QUERY.format(cat_id=cat_id)).fetchone()
+        query = SELECT_CATEGORY_QUERY.format(cat_id=cat_id)
+
+        res = self.cursor.execute(query)
+
+        if res is not None:
+            _id, category, category_code, description = res.fetchone()
+        elif cat_id == 0:
+            _id, category, category_code, description = cat_id, b'all', b'all', b'All Categories'
+        else:
+            return None
 
         return {
-            'id': id,
+            'id': _id,
             'category': category.decode('utf-8'),
             'category_code': category_code.decode('utf-8'),
             'description': description.decode('utf-8')
@@ -147,6 +168,7 @@ class AutocompleteTrainer(object):
         if self.cursor is not None:
             self.cursor.close()
 
-
-ac = AutocompleteTrainer()
-ac.train()
+#
+#
+# ac = AutocompleteTrainer(categories=[0])
+# ac.train()
