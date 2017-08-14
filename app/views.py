@@ -1,8 +1,7 @@
 import os
-import uuid
 
 import re
-from flask import render_template, request, jsonify
+from flask import request, jsonify
 
 from app import app, db
 from app.core.predict import Predictor
@@ -11,8 +10,8 @@ from config import base_dir
 
 
 @app.route('/', methods=['GET'])
-def home(response):
-    return render_template('index.html')
+def home():
+    return "Dingo CV API"
 
 
 @app.route('/predict', methods=['GET'])
